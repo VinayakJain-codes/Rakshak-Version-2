@@ -1,0 +1,27 @@
+# dependencies
+/node_modules
+/rakshak-web/node_modules
+
+# build outputs
+/rakshak-web/.next
+/rakshak-web/out
+/rakshak-web/build
+
+# environment variables
+.env
+.env*.local
+
+# OS & IDE files
+.DS_Store
+.vscode/
+.agents/
+
+# Scratch scripts
+rakshak-web/*.mjs
+rakshak-web/*.js
+rakshak-web/migration_*.sql
+
+# Ignore all markdown documentation files EXCEPT README.md
+*.md
+!README.md
+Plans/

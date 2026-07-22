@@ -43,8 +43,13 @@ export async function updateSession(request: NextRequest) {
 
   if (user) {
     // Read role from JWT app_metadata (set by custom claims or triggers, not user_metadata)
-    // If not present, default to nothing (no access)
-    const role = user.app_metadata?.role
+    let role = user.app_metadata?.role
+
+    // Fallback if role is not in JWT (e.g. hook not active)
+    if (!role) {
+      const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      role = data?.role
+    }
 
     if (!role && !isAuthRoute && !isPublicRoute) {
       const url = request.nextUrl.clone()
@@ -76,14 +81,15 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.rewrite(url)
     }
 
-    // Redirect authenticated users away from auth pages
-    if (isAuthRoute) {
+    // Redirect authenticated users away from auth pages (except logout)
+    if (isAuthRoute && pathname !== '/auth/logout') {
       const url = request.nextUrl.clone()
       if (role === 'SUPER_ADMIN') url.pathname = '/admin'
       else if (role === 'CLIENT_OWNER') url.pathname = '/org'
       else if (role === 'SUPERVISOR') url.pathname = '/ops'
       else if (role === 'GUARD') url.pathname = '/guard'
-      else url.pathname = '/'
+      else return supabaseResponse // If they still have no role, let them access the login page to re-authenticate or see an error
+      
       return NextResponse.redirect(url)
     }
   }
