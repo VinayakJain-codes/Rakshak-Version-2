@@ -21,6 +21,19 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+function formatTime(isoString: string) {
+  if (!isoString) return ''
+  const date = new Date(isoString)
+  if (isNaN(date.getTime())) return ''
+  let hours = date.getHours()
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  hours = hours % 12
+  hours = hours ? hours : 12
+  const hoursStr = hours.toString().padStart(2, '0')
+  return `${hoursStr}:${minutes} ${ampm}`
+}
+
 export default function GuardDashboardClient({
   schedules,
   unreadCount: initialUnread,
@@ -34,10 +47,17 @@ export default function GuardDashboardClient({
   const [unread, setUnread] = useState(initialUnread)
   const [newNotif, setNewNotif] = useState<string | null>(null)
   const [activeCheckInId, setActiveCheckInId] = useState<string | null>(null)
+  const [formattedDate, setFormattedDate] = useState<string>('')
 
   useEffect(() => {
     setLocalSchedules(schedules)
   }, [schedules])
+
+  useEffect(() => {
+    // Format date on client to ensure exact locale match
+    const now = new Date()
+    setFormattedDate(now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }))
+  }, [])
 
   useEffect(() => {
     // Subscribe to real-time notifications for this guard
@@ -67,7 +87,6 @@ export default function GuardDashboardClient({
     setLocalSchedules(prev => prev.map(s => s.id === scheduleId ? { ...s, is_completed: true } : s))
   }
 
-  const now = new Date()
   const pendingCount = localSchedules.filter(s => !s.is_completed).length
 
   return (
@@ -84,9 +103,9 @@ export default function GuardDashboardClient({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">Today's Shift Duties</h1>
-          <p suppressHydrationWarning className="text-xs sm:text-sm font-medium text-muted-foreground mt-1 flex items-center gap-1.5">
-            <Calendar className="w-4 h-4 text-emerald-500" />
-            <span>{now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground mt-1 flex items-center gap-1.5 min-h-[20px]">
+            <Calendar className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>{formattedDate || 'Today'}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -171,7 +190,7 @@ export default function GuardDashboardClient({
 
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="font-mono font-bold text-foreground">
-                      {new Date(s.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {formatTime(s.scheduled_time)}
                     </span>
                     {(s.sites?.name || (s.sites && (s.sites as any).name)) && (
                       <span className="flex items-center gap-1">

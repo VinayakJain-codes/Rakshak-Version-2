@@ -21,7 +21,18 @@ rakshak-web/*.mjs
 rakshak-web/*.js
 rakshak-web/migration_*.sql
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.venv
+venv/
+ENV/
+env/
+.pytest_cache/
+
 # Ignore all markdown documentation files EXCEPT README.md
 *.md
 !README.md
 Plans/
+

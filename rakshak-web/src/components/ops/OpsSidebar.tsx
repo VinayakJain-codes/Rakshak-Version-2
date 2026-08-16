@@ -9,6 +9,7 @@ import {
   Calendar, 
   ShieldAlert, 
   Radio, 
+  Camera,
   LogOut, 
   X,
   Zap
@@ -18,6 +19,7 @@ const navItems = [
   { href: '/ops', label: 'Dashboard', icon: LayoutGrid },
   { href: '/ops/guards', label: 'Guard Roster', icon: Users },
   { href: '/ops/schedule', label: 'Scheduling', icon: Calendar },
+  { href: '/ops/checkins', label: 'Photo Audits', icon: Camera },
   { href: '/ops/alerts', label: 'Emergency Alerts', icon: ShieldAlert },
   { href: '/ops/ping', label: 'Send Signal', icon: Radio },
 ]
